@@ -51,3 +51,10 @@
         dest: /etc/systemd/system/tomcat.service
         owner: tomcat
         group: tomcat   
+    - name: restart tomcat
+      ansible.builtin.systemd:
+        name: tomcat.service
+        daemon_reload: true 
+        state: started
+        
+
