@@ -1,0 +1,53 @@
+---
+- name: installing tomcat on ubuntu server 
+  hosts: all
+  become: yes
+  tasks:
+    - name: install openjdk-11
+      ansible.builtin.apt:
+        update_cache: true
+        name: openjdk-11-jdk 
+        state: present
+    - name: creating the tomcat group
+      ansible.builtin.group:
+        name: tomcat
+        state: present    
+    - name: creating the tomcat user
+      ansible.builtin.user:
+        name: tomcat
+        group: tomcat
+        create_home: true
+        home: /opt/tomcat
+        shell: /bin/false/
+        state: present
+    - name: download the tomcat 10.1.4
+      ansible.builtin.get_url:
+        url: https://dlcdn.apache.org/tomcat/tomcat-10/v10.0.27/bin/apache-tomcat-10.0.27.tar.gz
+        dest: /tmp/apache-tomcat-10.1.4.tar.gz
+    - name: unzip the tomcat tar file
+      ansible.builtin.unarchive:
+        src: /tmp/apache-tomcat-10.1.4.tar.gz
+        remote_src: yes
+        dest: /opt/tomcat
+    - name: creating a symbolic link
+      ansible.builtin.file:
+        src: /opt/tomcat/apache-tomcat-10.0.27
+        dest: /opt/tomcat/latest
+        owner: tomcat
+        group: tomcat
+        state: link 
+    - name: granting the premissions
+      ansible.builtin.file:
+        dest: /opt/tomcat/latest
+        owner: tomcat
+        group: tomcat
+        recurse: yes
+        state: directory
+    - name: giving executable premissions
+      ansible.builtin.shell: sudo sh -c 'chmod +x /opt/tomcat/latest/bin/*.sh' 
+    - name: copy the conntent to tomcat.service
+      ansible.builtin.copy:
+        src: tomcat.service
+        dest: /etc/systemd/system/tomcat.service
+        owner: tomcat
+        group: tomcat   
