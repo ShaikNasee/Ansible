@@ -8,7 +8,6 @@
     user_group: tomcat
     user_home: /opt/tomcat
     user_shell: /bin/false/
-    
   tasks:
     - name: install openjdk-11
       ansible.builtin.apt:
