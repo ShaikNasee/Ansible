@@ -8,6 +8,7 @@
     user_group: tomcat
     user_home: /opt/tomcat
     user_shell: /bin/false/
+    service_name: tomcat.service
   tasks:
     - name: install openjdk-11
       ansible.builtin.apt:
@@ -21,7 +22,7 @@
     - name: creating the tomcat user
       ansible.builtin.user:
         name: "{{ user_name}}"
-        group: "{{ user_group}}"
+        group: "{{ user_group }}"
         create_home: true
         home: "{{ user_home}}"
         shell: "{{ user_shell}}"
@@ -83,7 +84,7 @@
         group: "{{ user_group}}"
     - name: restart tomcat
       ansible.builtin.systemd:
-        name: tomcat.service
+        name: "{{ service_name}}"
         daemon_reload: true
         state: restarted
 
