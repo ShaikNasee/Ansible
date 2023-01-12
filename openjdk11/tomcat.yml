@@ -2,23 +2,30 @@
 - name: installing tomcat on ubuntu server 
   hosts: all
   become: yes
+  vars:
+    java_package: openjdk-11-jdk
+    user_name: tomcat
+    user_group: tomcat
+    user_home: /opt/tomcat
+    user_shell: /bin/false/
+    
   tasks:
     - name: install openjdk-11
       ansible.builtin.apt:
         update_cache: true
-        name: openjdk-11-jdk 
+        name: "{{ java_package}}"
         state: present
     - name: creating the tomcat group
       ansible.builtin.group:
-        name: tomcat
+        name: "{{ user_name}}"
         state: present    
     - name: creating the tomcat user
       ansible.builtin.user:
-        name: tomcat
-        group: tomcat
+        name: "{{ user_name}}"
+        group: {{ user_group:}}
         create_home: true
-        home: /opt/tomcat
-        shell: /bin/false/
+        home: "{{ user_home}}"
+        shell: "{{ user_shell}}"
         state: present
     - name: download the tomcat 10.1.4
       ansible.builtin.get_url:
@@ -33,14 +40,14 @@
       ansible.builtin.file:
         src: /opt/tomcat/apache-tomcat-10.1.4
         dest: /opt/tomcat/latest
-        owner: tomcat
-        group: tomcat
+        owner: "{{ user_name}}"
+        group: "{{ user_group}}"
         state: link 
     - name: granting the premissions
       ansible.builtin.file:
         dest: /opt/tomcat/latest
-        owner: tomcat
-        group: tomcat
+        owner: "{{ user_name}}"
+        group: "{{ user_group}}"
         recurse: yes
         state: directory
     - name: giving executable premissions
@@ -49,8 +56,8 @@
       ansible.builtin.copy:
         src: tomcat.service
         dest: /etc/systemd/system/tomcat.service
-        owner: tomcat
-        group: tomcat   
+        owner: "{{ user_name}}"
+        group: "{{ user_group}}" 
     - name: restart tomcat
       ansible.builtin.systemd:
         name: tomcat.service
@@ -61,20 +68,20 @@
       ansible.builtin.copy:
         src: tomcat-users.xml
         dest: /opt/tomcat/latest/webapps/manager/META-INF/context.xml
-        owner: tomcat
-        group: tomcat
+        owner: "{{ user_name}}"
+        group: "{{ user_group}}"
     - name: copy the hostmanager context
       ansible.builtin.copy:
         src: context.xml
         dest: /opt/tomcat/latest/webapps/manager/META-INF/context.xml
-        owner: tomcat
-        group: tomcat
+        owner: "{{ user_name}}"
+        group: "{{ user_group}}"
     - name: copy the host manager context
       ansible.builtin.copy:
         src: hostmanager-context.xml
         dest: /opt/tomcat/latest/webapps/host-manager/META-INF/context.xml
-        owner: tomcat
-        group: tomcat
+        owner: "{{ user_name}}"
+        group: "{{ user_group}}"
     - name: restart tomcat
       ansible.builtin.systemd:
         name: tomcat.service
